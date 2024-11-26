@@ -1,0 +1,39 @@
+services:
+  server-app:
+    container_name: server-app
+    image: server-app
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./.env
+    depends_on:
+      - pg-finance
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    volumes:
+      - ./:/server
+    networks:
+        - finance-network
+
+  pg-finance:
+      container_name: pg-finance
+      environment:
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_DB: ${DB_NAME}
+      image: postgres:alpine
+      restart: unless-stopped
+      volumes:
+        - pg-db-data:/var/lib/postgresql/data
+      networks:
+        - finance-network
+
+volumes:
+  pg-db-data:
+
+networks:
+  finance-network:
+    name: finance-network
+    driver: bridge
+
