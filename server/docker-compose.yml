@@ -4,7 +4,8 @@ services:
     image: server-app
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+      target: dev
     env_file:
       - ./.env
     depends_on:
@@ -12,7 +13,8 @@ services:
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     volumes:
-      - ./:/server
+      - ./src:/server/src
+      - /server/node_modules
     networks:
         - finance-network
 

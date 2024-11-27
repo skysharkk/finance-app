@@ -1,7 +1,0 @@
-FROM node:20-alpine
-
-WORKDIR /server
-
-EXPOSE ${SERVER_PORT}
-
-CMD [ "npm", "run", "dev" ]
