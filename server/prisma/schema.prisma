@@ -6,3 +6,92 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum TransactionType  {
+  INCOME
+  OUTCOME
+}
+
+model User {
+  userId String @id() @default(uuid()) @map("user_id")
+  name String
+  email String
+  password String
+  balance Decimal @db.Decimal(65,2)
+  createdAt DateTime @default(now()) @map("created_id")
+
+  budgets Budget[]
+  pots Pot[]
+  transactions Transaction[]
+  bills RecurringBill[]
+  categories BudgetCategory[]
+
+  @@map("users")
+}
+
+model Budget {
+  budgetId String @id() @default(uuid()) @map("budget_id")
+  maxSpend Decimal @db.Decimal(65,2) @map("max_spend")
+  userId String @map("user_id")
+  color String @db.VarChar(7)
+  categoryId String @map("category_id")
+
+  user User @relation(fields: [userId], references: [userId])
+  category BudgetCategory @relation(fields: [categoryId], references: [budgetCategoryId])
+
+  @@map("budgets")
+}
+
+model Pot {
+  potId String @id() @default(uuid()) @map("pot_id")
+  userId String @map("user_id")
+  color String @db.VarChar(7)
+  target Decimal @db.Decimal(65,2)
+
+  user User @relation(fields: [userId], references: [userId])
+
+  @@map("pots")
+}
+
+model BudgetCategory {
+  budgetCategoryId String @id() @default(uuid()) @map("budget_category_id")
+  userId String @map("user_id")
+  name String
+
+  budgets Budget[]
+  transactions Transaction[]
+  bills RecurringBill[]
+
+  user User @relation(fields: [userId], references: [userId])
+
+  @@map("budget_categories")
+}
+
+model Transaction {
+  transactionId String @id() @default(uuid()) @map("transaction_id")
+  userId String @map("user_id")
+  type TransactionType
+  name String
+  amount Decimal @db.Decimal(65,2)
+  categoryId String @map("category_id")
+  createdAt DateTime @default(now()) @map("created_id")
+
+  category BudgetCategory @relation(fields: [categoryId], references: [budgetCategoryId])
+  user User @relation(fields: [userId], references: [userId])
+
+  @@map("transactions")
+}
+
+model RecurringBill {
+  billId String @id() @default(uuid()) @map("bill_id")
+  userId String
+  name String
+  amount Decimal @db.Decimal(65,2)
+  categoryId String @map("category_id")
+  monthDay Int @map("month_day")
+
+  category BudgetCategory @relation(fields: [categoryId], references: [budgetCategoryId])
+  user User @relation(fields: [userId], references: [userId])
+
+  @@map("recurring_bills")
+}
